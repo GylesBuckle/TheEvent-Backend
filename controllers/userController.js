@@ -3,12 +3,6 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
 const User = require('../models/userModel');
-const Profile = require('../models/profiles');
-const Subcribers = require('../models/subcribers');
-const Notifications = require('../models/notificationsModal');
-const ProfileViews = require('../models/profileViews');
-const SocialClick = require('../models/socialClick');
-const UserActivity = require('../models/userActivity');
 
 //To filter Some fields from req.body so we can update only these fields
 const filterObj = (obj, ...allowed) => {

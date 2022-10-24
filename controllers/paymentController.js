@@ -1,7 +1,6 @@
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const PaymentModal = require('../models/paymentsModal');
-const Subcriptions = require('../models/subcriptionsModel');
 const { default: axios } = require('axios');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Email = require('../utils/emails');
@@ -14,8 +13,7 @@ exports.purchase = catchAsync(async (req, res, next) => {
   const { paymentMethod, tenure, subcriptionId, token } = req.body;
 
   let subcription = await Subcriptions.findById(subcriptionId);
-  if (!subcription)
-    return next(new AppError('requested Subcription not found', 404));
+  if (!subcription) return next(new AppError('requested Subcription not found', 404));
 
   let customer = null;
   let transactionId = null;
@@ -30,12 +28,9 @@ exports.purchase = catchAsync(async (req, res, next) => {
   });
   console.log(lastpayment, 'lastpayment');
   if (lastpayment && lastpayment.paymentMethod === 'stripe') {
-    const lastSubscription = await stripe.subscriptions.retrieve(
-      lastpayment.transactionId
-    );
+    const lastSubscription = await stripe.subscriptions.retrieve(lastpayment.transactionId);
     if (lastSubscription && lastSubscription.status === 'active') {
-      if (new Date() < new Date(lastSubscription.current_period_end * 1e3))
-        alreadyPaid = true;
+      if (new Date() < new Date(lastSubscription.current_period_end * 1e3)) alreadyPaid = true;
     }
   } else if (lastpayment && lastpayment.paymentMethod === 'paypal') {
     const lastSubscription = await axios.get(
@@ -48,10 +43,7 @@ exports.purchase = catchAsync(async (req, res, next) => {
       }
     );
     if (lastSubscription && lastSubscription.data.status === 'ACTIVE') {
-      if (
-        new Date() <
-        new Date(lastSubscription.data.billing_info.next_billing_time)
-      ) {
+      if (new Date() < new Date(lastSubscription.data.billing_info.next_billing_time)) {
         alreadyPaid = true;
       }
     }
@@ -62,10 +54,7 @@ exports.purchase = catchAsync(async (req, res, next) => {
     let lastStripePayment = await PaymentModal.findOne({
       $and: [{ userId: req.user._id }, { paymentMethod: 'stripe' }],
     });
-    if (
-      lastStripePayment &&
-      paymentMethod === lastStripePayment.paymentMethod
-    ) {
+    if (lastStripePayment && paymentMethod === lastStripePayment.paymentMethod) {
       customer = lastStripePayment.customerId;
     } else {
       let newCustomer = await stripe.customers.create({
@@ -75,9 +64,7 @@ exports.purchase = catchAsync(async (req, res, next) => {
       customer = newCustomer.id;
     }
     let priceId =
-      tenure === 'year'
-        ? subcription.stripeYearlyPlanId
-        : subcription.stripeMonthlyPlanId;
+      tenure === 'year' ? subcription.stripeYearlyPlanId : subcription.stripeMonthlyPlanId;
     const stripeSubcription = await stripe.subscriptions.create({
       customer: customer,
       items: [{ price: priceId }],
@@ -90,8 +77,7 @@ exports.purchase = catchAsync(async (req, res, next) => {
       },
     });
 
-    if (!stripeSubcription)
-      return next(new AppError('Error in activating subcriptions', 402));
+    if (!stripeSubcription) return next(new AppError('Error in activating subcriptions', 402));
     transactionId = stripeSubcription.id;
     createdAt = new Date(stripeSubcription.current_period_start * 1e3);
     expireTime = new Date(stripeSubcription.current_period_end * 1e3);
@@ -131,28 +117,18 @@ exports.purchase = catchAsync(async (req, res, next) => {
     //createdAt = new Date(stripeSubcription.current_period_start * 1e3);
     // expireTime = new Date(stripeSubcription.current_period_end * 1e3);
 
-    const sub = await axios.get(
-      `${process.env.PAYPAL_URL}/v1/billing/subscriptions/${token}`,
-      {
-        headers: {
-          Authorization: `Basic ${encodedToken}`,
-          'content-type': 'application/json',
-        },
-      }
-    );
+    const sub = await axios.get(`${process.env.PAYPAL_URL}/v1/billing/subscriptions/${token}`, {
+      headers: {
+        Authorization: `Basic ${encodedToken}`,
+        'content-type': 'application/json',
+      },
+    });
     if (!sub) {
-      return next(
-        new AppError('requested Subcription not found on paypal', 404)
-      );
+      return next(new AppError('requested Subcription not found on paypal', 404));
     }
 
     if (sub.data.status !== 'ACTIVE') {
-      return next(
-        new AppError(
-          'Subcription not activated! Activate Subcription to continue',
-          404
-        )
-      );
+      return next(new AppError('Subcription not activated! Activate Subcription to continue', 404));
     }
     console.log(sub.data);
     customer = sub.data.subscriber.payer_id;
@@ -217,11 +193,7 @@ exports.stripeWebHook = catchAsync(async (req, res, next) => {
   const sig = req.headers['stripe-signature'];
 
   try {
-    event = stripe.webhooks.constructEvent(
-      req.rawBody,
-      sig,
-      process.env.STRIPE_WEBHOOK
-    );
+    event = stripe.webhooks.constructEvent(req.rawBody, sig, process.env.STRIPE_WEBHOOK);
   } catch (err) {
     console.log('error in webhook signature', err);
     return next(new AppError(`Webhook Error: ${err.message}`, 400));
@@ -287,9 +259,7 @@ exports.userSubcriptions = catchAsync(async (req, res, next) => {
 
     if (invoices && invoices.data) {
       invoices.data.map((x) => {
-        let subcriptionPayment = stripePayments.find(
-          (s) => s.transactionId === x.subscription
-        );
+        let subcriptionPayment = stripePayments.find((s) => s.transactionId === x.subscription);
 
         paymentHistory.push({
           date: new Date(x.created * 1e3),
@@ -361,9 +331,7 @@ exports.userSubcription = catchAsync(async (req, res, next) => {
 
   let paid = false;
   if (lastpayment && lastpayment.paymentMethod === 'stripe') {
-    const subscription = await stripe.subscriptions.retrieve(
-      lastpayment.transactionId
-    );
+    const subscription = await stripe.subscriptions.retrieve(lastpayment.transactionId);
     if (subscription) {
       paid = true;
       lastpayment = {

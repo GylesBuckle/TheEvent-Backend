@@ -1,7 +1,6 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
-const Profile = require('../models/profiles');
 
 const Roles = require('../models/roles');
 const PaymentsModal = require('../models/paymentsModal');

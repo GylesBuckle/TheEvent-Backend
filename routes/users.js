@@ -49,7 +49,7 @@ router.post('/activateTrail', restrictTo(['User']), userController.activateTrail
 router.post(
   '/addNotification',
   restrictTo(['Company']),
-  upload('attachment', 'attachments/', true),
+  upload.single('attachment', 'attachments/', true),
   userController.addNotifications
 );
 router.post('/updateNotifications', userController.updateNotifications);

@@ -11,6 +11,7 @@ const AppError = require('./utils/appError');
 const globalError = require('./controllers/errorController');
 
 const userRoutes = require('./routes/users');
+const eventRoutes = require('./routes/eventRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
@@ -74,6 +75,8 @@ app.get('/api/v1/test', (req, res) => {
   });
 });
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/events', eventRoutes);
+
 app.use('/api/v1/payment', paymentRoutes);
 app.use(globalError);
 
