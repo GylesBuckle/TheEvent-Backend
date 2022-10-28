@@ -6,35 +6,12 @@ const crypto = require('crypto');
 
 var UserSchema = mongoose.Schema(
   {
-    employeeData: {
-      title: {
-        type: String,
-      },
-      firstName: {
-        type: String,
-      },
-      middleName: {
-        type: String,
-      },
-      lastName: {
-        type: String,
-      },
-      primaryEmail: {
-        type: String,
-      },
-      primaryPhone: {
-        type: String,
-      },
-      password: {
-        type: String,
-      },
-    },
-
-    userName: {
+    firstName: {
       type: String,
-      //lowercase: true,
-      unique: [true, 'Username already exist'],
-      required: [true, 'A User must have a username'],
+      required: [true, 'A User must have a first name'],
+    },
+    lastName: {
+      type: String,
     },
     email: {
       type: String,
@@ -47,30 +24,17 @@ var UserSchema = mongoose.Schema(
       type: String,
       required: [true, 'A User must have a Password'],
       select: false,
+      min: [5, 'User password must be 5 characters or long'],
       //at least 8 characters, one upper case letter, one lower case letter and one symbol or special character. And it also contains no spaces, tabs or line breaks.
-      validate: {
-        validator: function (v) {
-          return /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*]).{8,}$/.test(v);
-        },
-        message:
-          'Password must contain at least 8 characters, one upper case letter, one special character and one number.',
-      },
+      // validate: {
+      //   validator: function (v) {
+      //     return /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*]).{8,}$/.test(v);
+      //   },
+      //   message:
+      //     'Password must contain at least 8 characters, one upper case letter, one special character and one number.',
+      // },
     },
-    active: {
-      type: Boolean,
-      default: true,
-    },
-    lifeTime: {
-      type: Boolean,
-      default: false,
-    },
-    trailTaken: {
-      type: Boolean,
-      default: false,
-    },
-    trailTime: {
-      type: Date,
-    },
+
     roles: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -84,100 +48,16 @@ var UserSchema = mongoose.Schema(
         required: true,
       },
     ],
-    activeProfile: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Profile',
-    },
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    }, //only for employee
-    profiles: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Profile',
-      },
-    ],
-    portfolio: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Portfolio',
-    },
-    meetingUrl: String,
-    google_refresh_token: String,
-    google_email: String,
-    zoom_access_token: String,
-    zoom_refresh_token: String,
-    zoom_expires_in: Date,
-    zoom_email: String,
-    timezone: String,
-    availableDays: {
-      type: [
-        {
-          day: Number,
-          timeSlots: [
-            {
-              fromSelect: String,
-              toSelect: String,
-            },
-          ],
-        },
-      ],
-      default: [
-        {
-          day: 0,
-          timeSlots: [],
-        },
-        {
-          day: 1,
-          timeSlots: [{ fromSelect: '09:00', toSelect: '17:00' }],
-        },
-        {
-          day: 2,
-          timeSlots: [{ fromSelect: '09:00', toSelect: '17:00' }],
-        },
-        {
-          day: 3,
-          timeSlots: [{ fromSelect: '09:00', toSelect: '17:00' }],
-        },
-        {
-          day: 4,
-          timeSlots: [{ fromSelect: '09:00', toSelect: '17:00' }],
-        },
-        {
-          day: 5,
-          timeSlots: [{ fromSelect: '09:00', toSelect: '17:00' }],
-        },
-        {
-          day: 6,
-          timeSlots: [],
-        },
-      ],
-    },
-    meetings: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'meetings',
-      },
-    ],
-    meetingTheme: {
-      type: String,
-      default: '1',
-    },
-    role: String,
     passwordResetToken: String,
     passwordResetExpires: Date,
     changedPasswordAt: Date,
-    paperSaved: {
-      type: Number,
-      default: 0,
-    },
-    emailVerified: {
-      type: Boolean,
-      default: false,
-      select: false,
-    },
-    emailVerificationToken: String,
-    emailVerificationExpires: Date,
+    // emailVerified: {
+    //   type: Boolean,
+    //   default: false,
+    //   select: false,
+    // },
+    // emailVerificationToken: String,
+    // emailVerificationExpires: Date,
   },
   {
     toJSON: { virtuals: true },

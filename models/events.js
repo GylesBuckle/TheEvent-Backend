@@ -88,7 +88,7 @@ var EventsSchema = mongoose.Schema({
       date: Date,
       topic: String,
       topicDetails: String,
-      speakerName: String,
+      speaker: String,
     },
   ],
 });
