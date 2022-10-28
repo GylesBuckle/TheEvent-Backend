@@ -14,6 +14,7 @@ router.post('/forgetpassword', authController.forgotPassword);
 router.post('/resetPassword/:token', authController.resetPassword);
 
 router.use(protect);
+router.post('/validateToken', authController.validateUser);
 
 router.patch('/updatePassword', authController.updatePassword);
 router.get('/', restrictTo(['Admin', 'Super Admin']), userController.getUsers);

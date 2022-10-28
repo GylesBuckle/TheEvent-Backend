@@ -184,7 +184,14 @@ exports.externalLogin = catchAsync(async (req, res, next) => {
     createLoginToken({ ...newUser._doc, roles: [roleId.name] }, 200, req, res);
   }
 });
-
+exports.validateUser = catchAsync(async (req, res, next) => {
+  res.status(200).json({
+    success: true,
+    data: {
+      user: req.user,
+    },
+  });
+});
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   let { email } = req.body;
   //Get User Based on Email

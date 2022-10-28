@@ -26,8 +26,8 @@ mongoose
   })
   .then(async () => {
     console.log('DB connection Success');
-    // await createDefaultRoles(['Admin', 'User', 'Super Admin']);
-    //await signUpAdmin();
+    await createDefaultRoles(['Admin', 'User', 'Super Admin']);
+    await signUpAdmin();
     console.log('Default data success');
   })
   .catch((err) => console.log(err));

@@ -24,7 +24,7 @@ var UserSchema = mongoose.Schema(
       type: String,
       required: [true, 'A User must have a Password'],
       select: false,
-      min: [5, 'User password must be 5 characters or long'],
+      min: [6, 'User password must be 5 characters or long'],
       //at least 8 characters, one upper case letter, one lower case letter and one symbol or special character. And it also contains no spaces, tabs or line breaks.
       // validate: {
       //   validator: function (v) {

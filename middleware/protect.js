@@ -21,21 +21,7 @@ module.exports = catchAsync(async (req, res, next) => {
   //verifying Token
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
   //checking User Really Exist
-  const freshUser = await User.findById(decoded.id)
-    .select('+password')
-    .populate('roles')
-    .populate({
-      path: 'profiles',
-      populate: {
-        path: 'companyId',
-        match: { _id: { $exists: true } },
-      },
-    })
-    .populate({
-      path: 'portfolio',
-      match: { _id: { $exists: true } },
-    })
-    .populate('meetings');
+  const freshUser = await User.findById(decoded.id).select('+password').populate('roles');
 
   if (!freshUser)
     return next(new AppError('The User Belonging to this Token does no longer Exist', 401));

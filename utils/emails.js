@@ -7,7 +7,7 @@ module.exports = class SendEmail {
     this.firstName = user.userName;
     this.url = url;
     this.homepage = homepageLink;
-    this.from = `Tappio <${process.env.EMAIL_FROM}>`;
+    this.from = `${process.env.platform} <${process.env.EMAIL_FROM}>`;
     this.plan = plan;
   }
   createTransport() {
@@ -20,7 +20,7 @@ module.exports = class SendEmail {
     });
   }
   //send Actual email
-  async send(template, subject, pass) {
+  async send(template, subject) {
     //Render Hml base Template
     const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
       name: this.firstName,
@@ -29,7 +29,7 @@ module.exports = class SendEmail {
       homepage: this.url,
       admin: process.env.EMAIL_FROM,
       plan: this.plan,
-      password: pass,
+      platform: process.env.platform,
     });
     //Email Option
     const mailOptions = {
@@ -52,7 +52,7 @@ module.exports = class SendEmail {
   async sendPasswordReset() {
     await this.send('passwordReset', 'Your Password Reset Token');
   }
-  async sendEmailVerification(pass) {
-    await this.send('emailVerification', 'Email Confirmation', pass);
+  async sendEmailVerification() {
+    await this.send('emailVerification', 'Email Confirmation');
   }
 };
