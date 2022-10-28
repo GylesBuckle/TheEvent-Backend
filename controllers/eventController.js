@@ -21,3 +21,12 @@ exports.searchLocation = catchAsync(async (req, res, next) => {
     })),
   });
 });
+
+exports.createEvent = catchAsync(async (req, res, next) => {
+  console.log(req.files, req.file, req.body);
+  res.status(400).json({
+    success: false,
+    message: 'd',
+  });
+});
+exports.updateEvent = catchAsync(async (req, res, next) => {});

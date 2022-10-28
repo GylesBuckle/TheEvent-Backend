@@ -6,11 +6,25 @@ const path = require('path');
 
 const storage = multer.diskStorage({
   destination: (req, file, callback) => {
-    if (fs.existsSync('/public/files')) {
-      callback(null, 'public/files');
+    let des = path.join(__dirname, '../files');
+    switch (file.fieldname) {
+      case 'image':
+        des = des + '/events';
+        break;
+      case 'newSponsorsImages':
+        des = des + '/sponsors';
+        break;
+      case 'newSpeakersImages':
+        des = des + '/speakers';
+        break;
+      default:
+        break;
+    }
+    if (fs.existsSync(des)) {
+      callback(null, des);
     } else {
-      fs.mkdir('/public/files', { recursive: true }, () => {
-        callback(null, 'public/files');
+      fs.mkdir(des, { recursive: true }, () => {
+        callback(null, des);
       });
     }
   },
@@ -23,28 +37,19 @@ const storage = multer.diskStorage({
 
 const multerFilter = (req, file, cb) => {
   let allowedType = '';
-  switch (file.fieldname) {
-    case 'images':
-      allowedType = /\.(jpg|JPG|jpeg|JPEG|png|PNG|webp)$/;
-      break;
-
-    case 'video':
-      allowedType = /\.(wmv|avi|mov|3gp|mp4|flv)$/;
-      break;
-    case 'attachement':
-      allowedType = /\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|pdf|doc|docx)$/;
-      break;
-    case 'file':
-      allowedType = /\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|pdf|doc|docx|zip|rar)$/;
-      break;
-    default:
-      allowedType = /\.(jpg|JPG|jpeg|JPEG|png|PNG)$/;
-      break;
+  if (
+    file.fieldname === 'image' ||
+    file.fieldname === 'newSponsorsImages' ||
+    file.fieldname === 'newSpeakersImages'
+  ) {
+    allowedType = /\.(jpg|JPG|jpeg|JPEG|png|PNG|webp)$/;
+  } else {
+    allowedType = /\.(jpg|JPG|jpeg|JPEG|png|PNG)$/;
   }
   if (file.originalname.match(allowedType)) {
     cb(null, true);
   } else {
-    console.log(file.originalname, allowedType);
+    //console.log(file.originalname, allowedType);
     cb(new AppError('Invalid Format testing', 400), false);
   }
 };
@@ -52,6 +57,7 @@ module.exports = multer({
   storage: storage,
   fileFilter: multerFilter,
   onError: function (err, next) {
+    console.log(err);
     next(next(new AppError('Error in Updloading Image.', 500)));
   },
 });

@@ -28,7 +28,6 @@ var EventsSchema = mongoose.Schema({
   },
   venue: {
     type: String,
-    required: [true, 'An Event must have a Venue'],
   },
   price: {
     type: Number,
