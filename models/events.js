@@ -26,6 +26,7 @@ var EventsSchema = mongoose.Schema({
     type: String,
     required: [true, 'An Event must have a Location'],
   },
+  locationCoordinates: [Number],
   venue: {
     type: String,
   },

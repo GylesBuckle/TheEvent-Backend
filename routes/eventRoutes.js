@@ -13,9 +13,11 @@ router.use(protect);
 router.get('/searchLocation', eventController.searchLocation);
 router.post(
   '/',
-  upload.single('image'),
-  //   upload.array('newSponsorsImages'),
-  //   upload.array('newSpeakersImages'),
+  upload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'newSponsorsImages' },
+    { name: 'newSpeakersImages' },
+  ]),
   eventController.createEvent
 );
 

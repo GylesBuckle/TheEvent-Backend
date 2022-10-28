@@ -23,10 +23,43 @@ exports.searchLocation = catchAsync(async (req, res, next) => {
 });
 
 exports.createEvent = catchAsync(async (req, res, next) => {
-  console.log(req.files, req.file, req.body);
-  res.status(400).json({
-    success: false,
-    message: 'd',
-  });
+  let {
+    name,
+    tags,
+    description,
+    startDate,
+    endDate,
+    location,
+    locationCoordinates,
+    venue,
+    price,
+    address,
+    phone,
+    email,
+    facebook,
+    twitter,
+    insta,
+    linkdin,
+    snapchat,
+    whatsApp,
+    sponsors,
+    speakers,
+    schedule,
+    deletedSponsorsImages,
+    newSponsorsImagesIndex,
+    deleteSpeakersImages,
+    newSpeakersImagesIndex,
+  } = req.body;
+  startDate = new Date(startDate);
+  endDate = new Date(endDate);
+  tags = JSON.parse(tags);
+  locationCoordinates = JSON.parse(locationCoordinates);
+  schedule = JSON.parse(schedule);
+  deletedSponsorsImages = JSON.parse(deletedSponsorsImages);
+  newSponsorsImagesIndex = JSON.parse(newSponsorsImagesIndex);
+  sponsors = JSON.parse(sponsors);
+  deleteSpeakersImages = JSON.parse(deleteSpeakersImages);
+  newSpeakersImagesIndex = JSON.parse(newSpeakersImagesIndex);
+  speakers = JSON.parse(speakers);
 });
 exports.updateEvent = catchAsync(async (req, res, next) => {});
