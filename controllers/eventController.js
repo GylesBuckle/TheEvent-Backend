@@ -3,7 +3,6 @@ const AppError = require('../utils/appError');
 let Events = require('../models/events');
 const axios = require('axios');
 const deleteFiles = require('../utils/deleteFiles');
-
 exports.searchLocation = catchAsync(async (req, res, next) => {
   const query = req.query.q;
   const lang = req.query.lang;
@@ -51,9 +50,10 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     newSponsorsImagesIndex,
     deleteSpeakersImages,
     newSpeakersImagesIndex,
+    timezone,
   } = req.body;
-  startDate = new Date(startDate);
-  endDate = new Date(endDate);
+  startDate = startDate;
+  endDate = endDate;
   tags = JSON.parse(tags);
   locationCoordinates = JSON.parse(locationCoordinates);
   schedule = JSON.parse(schedule);
@@ -122,7 +122,7 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     }),
     schedule: schedule.map((x) => {
       return {
-        startDate: new Date(x.startDate),
+        startDate: x.startDate,
         topic: x.topic,
         topicDetails: x.topicDetails,
         speaker: x.speaker,
@@ -164,14 +164,15 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
     newSponsorsImagesIndex,
     deleteSpeakersImages,
     newSpeakersImagesIndex,
+    timezone,
   } = req.body;
 
   const event = await Events.findById(req.params.id);
   if (!event) {
     return next(new AppError('requested Event not found', 404));
   }
-  startDate = new Date(startDate);
-  endDate = new Date(endDate);
+  startDate = startDate;
+  endDate = endDate;
   try {
     tags = JSON.parse(tags);
     locationCoordinates = JSON.parse(locationCoordinates);
@@ -262,7 +263,7 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
       }),
       schedule: schedule.map((x) => {
         return {
-          startDate: new Date(x.startDate),
+          startDate: x.startDate,
           topic: x.topic,
           topicDetails: x.topicDetails,
           speaker: x.speaker,

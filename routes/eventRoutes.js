@@ -10,8 +10,8 @@ const router = express.Router();
 router.get('/:id', eventController.getEvent);
 router.use(protect);
 
-//router.use(restrictTo(['Admin', 'Super Admin']));
-router.get('/searchLocation', eventController.searchLocation);
+router.use(restrictTo(['Admin', 'Super Admin']));
+router.get('/location/searchLocation', eventController.searchLocation);
 router.post(
   '/',
   upload.fields([
