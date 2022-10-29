@@ -6,7 +6,7 @@ const path = require('path');
 
 const storage = multer.diskStorage({
   destination: (req, file, callback) => {
-    let des = path.join(__dirname, '../files');
+    let des = path.join(__dirname, '../public/files');
     switch (file.fieldname) {
       case 'image':
         des = des + '/events';

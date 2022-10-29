@@ -11,7 +11,7 @@ function deleteFiles(files, callback) {
     });
   }
 }
-export default deleteFiles;
+module.exports = deleteFiles;
 
 // deleteFiles(
 //   product.images.map((x) => `/public/files/${x}`),

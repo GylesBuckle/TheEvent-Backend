@@ -32,6 +32,7 @@ var EventsSchema = mongoose.Schema({
   },
   price: {
     type: Number,
+    min: [0.01, 'Value must be greater than zero'],
     required: [true, 'An Event must have price'],
   },
   address: {
@@ -85,7 +86,7 @@ var EventsSchema = mongoose.Schema({
   ],
   schedule: [
     {
-      date: Date,
+      startDate: Date,
       topic: String,
       topicDetails: String,
       speaker: String,

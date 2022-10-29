@@ -7,6 +7,7 @@ const upload = require('../middleware/imageUpload');
 
 const router = express.Router();
 
+router.get('/:id', eventController.getEvent);
 router.use(protect);
 
 //router.use(restrictTo(['Admin', 'Super Admin']));
@@ -23,9 +24,11 @@ router.post(
 
 router.patch(
   '/:id',
-  upload.single('image'),
-  upload.array('newSponsorsImages'),
-  upload.array('newSpeakersImages'),
+  upload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'newSponsorsImages' },
+    { name: 'newSpeakersImages' },
+  ]),
   eventController.updateEvent
 );
 module.exports = router;

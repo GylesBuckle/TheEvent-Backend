@@ -44,11 +44,10 @@ exports.createOne = catchAsync(async (req, res, next) => {
   const { name } = req.body;
 
   const doc = await Roles.create({ name });
-  if (!doc)
-    return next(new AppError('server unable to read this request', 500));
+  if (!doc) return next(new AppError('server unable to read this request', 500));
 
   res.status(201).json({
-    status: 'success',
+    success: true,
     data: {
       doc,
     },
@@ -83,7 +82,7 @@ exports.getOne = catchAsync(async (req, res, next) => {
     return next(new AppError('requested Id not found', 404));
   }
   res.status(200).json({
-    status: 'success',
+    success: true,
     data: { doc },
   });
 });
