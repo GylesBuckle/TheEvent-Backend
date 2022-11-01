@@ -30,6 +30,7 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     description,
     startDate,
     endDate,
+    totalTicket,
     location,
     locationCoordinates,
     venue,
@@ -92,6 +93,7 @@ exports.createEvent = catchAsync(async (req, res, next) => {
       req.files && req.files.image && req.files.image.length > 0 ? req.files.image[0].filename : '',
     startDate,
     endDate,
+    totalTicket,
     location,
     locationCoordinates,
     venue,
@@ -144,6 +146,7 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
     description,
     startDate,
     endDate,
+    totalTicket,
     location,
     locationCoordinates,
     venue,
@@ -224,6 +227,13 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
       startDate:
         startDate !== undefined ? startDate : event.startDate !== undefined ? event.startDate : '',
       endDate: endDate !== undefined ? endDate : event.endDate !== undefined ? event.endDate : '',
+      totalTicket:
+        totalTicket !== undefined
+          ? totalTicket
+          : event.totalTicket !== undefined
+          ? event.totalTicket
+          : '',
+
       location:
         location !== undefined ? location : event.location !== undefined ? event.location : '',
       locationCoordinates:

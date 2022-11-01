@@ -65,10 +65,11 @@ var EventsSchema = mongoose.Schema({
   whatsApp: {
     type: String,
   },
-  //   totalTicket:{
-  //     type: Number,
-  //     required: [true, 'An Event must have number of tickets'],
-  //   },
+  totalTicket: {
+    type: Number,
+    min: [1, 'An Event must have number of tickets'],
+    required: [true, 'An Event must have number of tickets'],
+  },
   sponsors: [String],
   speakers: [
     {
