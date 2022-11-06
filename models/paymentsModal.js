@@ -1,41 +1,52 @@
 const mongoose = require('mongoose');
 
 const PaymentSchema = mongoose.Schema({
+  customerData: {
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: String,
+    email: {
+      type: String,
+      required: true,
+    },
+    address: String,
+    country: String,
+    city: String,
+    state: String,
+    phone: String,
+  },
+  date: {
+    type: Date,
+    default: Date.now(),
+  },
   paymentMethod: {
     type: String,
-    enum: ['paypal', 'stripe'],
+    enum: ['stripe'],
     required: [true, 'A Payemnt must have a Payment method name'],
-  },
-  tenure: {
-    type: String,
-    required: true,
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
-  subcriptionId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Subcriptions',
-    required: true,
+  totalAmount: {
+    type: Number,
+    min: [1, 'Amount must be above 0'],
   },
-  customerId: {
-    type: String,
-    required: true,
+  quantity: {
+    type: Number,
+    min: [1, 'Quantity must be above 0'],
   },
   transactionId: {
     type: String,
     required: true,
   },
-  createdAt: {
-    type: Date,
+  coupan: {
+    type: String,
     required: true,
   },
-  // expireTime: {
-  //   type: Date,
-  //   required: true,
-  // },
 });
 
 let Payments;
