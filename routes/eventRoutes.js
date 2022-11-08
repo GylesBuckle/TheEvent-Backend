@@ -8,6 +8,8 @@ const upload = require('../middleware/imageUpload');
 const router = express.Router();
 
 router.get('/:id', eventController.getEvent);
+router.get('/', eventController.getEvents);
+
 router.use(protect);
 
 router.use(restrictTo(['Admin', 'Super Admin']));

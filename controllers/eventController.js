@@ -1,8 +1,12 @@
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 let Events = require('../models/events');
+let Payments = require('../models/paymentsModal');
 const axios = require('axios');
 const deleteFiles = require('../utils/deleteFiles');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { v4: uuidv4 } = require('uuid');
+
 exports.searchLocation = catchAsync(async (req, res, next) => {
   const query = req.query.q;
   const lang = req.query.lang;
@@ -346,6 +350,106 @@ exports.getEvent = catchAsync(async (req, res, next) => {
   }
   res.status(200).json({
     success: true,
+    data: { doc },
+  });
+});
+
+exports.getEvents = catchAsync(async (req, res, next) => {
+  let doc = await Events.find({ startDate: { $gt: new Date() } });
+
+  res.status(200).json({
+    success: true,
+    result: doc.length,
+    data: { doc },
+  });
+});
+
+exports.bookEvent = catchAsync(async (req, res, next) => {
+  const { eventId, stripeToken, customerData, quantity } = req.body;
+  let event = await Events.findById(eventId);
+  if (!event) return next(new AppError('requested Event not found', 404));
+
+  if (event.remainingTickets === 0) return next(new AppError('Event out of stock', 404));
+  if (quantity > event.remainingTickets) return next(new AppError('Event out of stock', 404));
+
+  const fakeKey = uuidv4();
+  return stripe.customers
+    .create({
+      email: stripeToken.email,
+      source: stripeToken.id,
+    })
+    .then((customer) => {
+      return stripe.charges.create(
+        {
+          ///source: stripeToken.card.id,
+          customer: customer.id, // set the customer id
+          amount: event.price * 100 * quantity, // 25
+          currency: 'usd',
+          description: `Product ${event.name} Purchased `,
+          receipt_email: stripeToken.email,
+        },
+        { idempotencyKey: fakeKey }
+      );
+    })
+    .then(async (result) => {
+      const doc = await Payments.create({
+        customerData,
+        paymentMethod: 'stripe',
+        userId: req.user.id,
+        event: event.id,
+        totalAmount: event.price * quantity,
+        quantity,
+        transactionId: result.id,
+      });
+
+      res.status(201).json({
+        success: true,
+        data: {
+          doc,
+        },
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      let message = '';
+      switch (err.type) {
+        case 'StripeCardError':
+          // A declined card error
+          message = "Your card's expiration year is invalid.";
+          break;
+        case 'StripeInvalidRequestError':
+          message = "Invalid parameters were supplied to Stripe's API";
+          break;
+        case 'StripeAPIError':
+          message = "An error occurred internally with Stripe's API";
+          break;
+        case 'StripeConnectionError':
+          message = 'Some kind of error occurred during the HTTPS communication';
+          break;
+        case 'StripeAuthenticationError':
+          message = 'You probably used an incorrect API key';
+          break;
+        case 'StripeRateLimitError':
+          message = 'Too many requests hit the API too quickly';
+          break;
+        default:
+          message = 'Something went wrong';
+          break;
+      }
+      return next(new AppError(message, 500));
+    });
+});
+
+exports.userOrders = catchAsync(async (req, res, next) => {
+  const doc = await Payments.find({
+    userId: req.user.id,
+  })
+    .populate('userId')
+    .populate('event');
+
+  res.status(200).json({
+    success: true,
+    result: doc.length,
     data: { doc },
   });
 });

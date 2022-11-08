@@ -31,6 +31,11 @@ const PaymentSchema = mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  event: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Events',
+    required: true,
+  },
   totalAmount: {
     type: Number,
     min: [1, 'Amount must be above 0'],
@@ -45,7 +50,6 @@ const PaymentSchema = mongoose.Schema({
   },
   coupan: {
     type: String,
-    required: true,
   },
 });
 
