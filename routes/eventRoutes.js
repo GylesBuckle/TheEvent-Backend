@@ -12,6 +12,9 @@ router.get('/', eventController.getEvents);
 
 router.use(protect);
 
+router.post('/bookEvent', eventController.bookEvent);
+router.post('/my-bookings', eventController.userBookings);
+
 router.use(restrictTo(['Admin', 'Super Admin']));
 router.get('/location/searchLocation', eventController.searchLocation);
 router.post(
@@ -33,4 +36,5 @@ router.patch(
   ]),
   eventController.updateEvent
 );
+
 module.exports = router;

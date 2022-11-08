@@ -375,7 +375,7 @@ exports.bookEvent = catchAsync(async (req, res, next) => {
   const fakeKey = uuidv4();
   return stripe.customers
     .create({
-      email: stripeToken.email,
+      email: customerData.email,
       source: stripeToken.id,
     })
     .then((customer) => {
@@ -386,7 +386,7 @@ exports.bookEvent = catchAsync(async (req, res, next) => {
           amount: event.price * 100 * quantity, // 25
           currency: 'usd',
           description: `Product ${event.name} Purchased `,
-          receipt_email: stripeToken.email,
+          receipt_email: customerData.email,
         },
         { idempotencyKey: fakeKey }
       );
@@ -440,7 +440,7 @@ exports.bookEvent = catchAsync(async (req, res, next) => {
     });
 });
 
-exports.userOrders = catchAsync(async (req, res, next) => {
+exports.userBookings = catchAsync(async (req, res, next) => {
   const doc = await Payments.find({
     userId: req.user.id,
   })
