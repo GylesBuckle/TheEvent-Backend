@@ -376,7 +376,7 @@ exports.bookEvent = catchAsync(async (req, res, next) => {
   return stripe.customers
     .create({
       email: customerData.email,
-      source: stripeToken.id,
+      source: process.env.NODE_ENV === 'development' ? 'tok_visa' : stripeToken.id,
     })
     .then((customer) => {
       return stripe.charges.create(
@@ -395,7 +395,7 @@ exports.bookEvent = catchAsync(async (req, res, next) => {
       const doc = await Payments.create({
         customerData,
         paymentMethod: 'stripe',
-        userId: req.user.id,
+        userId: req.user._id,
         event: event.id,
         totalAmount: event.price * quantity,
         quantity,
@@ -442,7 +442,7 @@ exports.bookEvent = catchAsync(async (req, res, next) => {
 
 exports.userBookings = catchAsync(async (req, res, next) => {
   const doc = await Payments.find({
-    userId: req.user.id,
+    userId: req.user._id,
   })
     .populate('userId')
     .populate('event');
