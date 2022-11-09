@@ -37,4 +37,5 @@ router.patch(
   eventController.updateEvent
 );
 
+router.delete('/:id', eventController.delete);
 module.exports = router;

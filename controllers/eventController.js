@@ -364,6 +364,17 @@ exports.getEvents = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.delete = catchAsync(async (req, res, next) => {
+  const doc = await Events.findByIdAndDelete(req.params.id);
+  if (!doc) {
+    return next(new AppError('Requested Id not found', 404));
+  }
+  res.status(204).json({
+    success: true,
+    data: 'deleted Successfully',
+  });
+});
+
 exports.bookEvent = catchAsync(async (req, res, next) => {
   const { eventId, stripeToken, customerData, quantity } = req.body;
   let event = await Events.findById(eventId);
