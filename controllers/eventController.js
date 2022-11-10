@@ -464,3 +464,119 @@ exports.userBookings = catchAsync(async (req, res, next) => {
     data: { doc },
   });
 });
+
+exports.getDashboardData = catchAsync(async (req, res, next) => {
+  //weekly,monthly,yearly sales
+  let sales = await Payments.aggregate([
+    {
+      $facet: {
+        weekly: [
+          {
+            $match: {
+              date: {
+                $gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000),
+              },
+            },
+          },
+          { $group: { _id: '$totalAmount', count: { $count: {} } } },
+          {
+            $group: {
+              _id: null,
+              result: {
+                $push: {
+                  date: '$_id',
+                  count: '$count',
+                },
+              },
+            },
+          },
+        ],
+        monthly: [
+          {
+            $match: {
+              date: {
+                $gte: new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000),
+              },
+            },
+          },
+          { $group: { _id: '$totalAmount', count: { $count: {} } } },
+          {
+            $group: {
+              _id: null,
+              result: {
+                $push: {
+                  date: '$_id',
+                  count: '$count',
+                },
+              },
+            },
+          },
+        ],
+        yearly: [
+          {
+            $match: {
+              date: {
+                $gte: new Date(new Date().getTime() - 360 * 24 * 60 * 60 * 1000),
+              },
+            },
+          },
+          { $group: { _id: '$totalAmount', count: { $count: {} } } },
+          {
+            $group: {
+              _id: null,
+              result: {
+                $push: {
+                  date: '$_id',
+                  count: '$count',
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        weekly: {
+          $arrayElemAt: ['$weekly', 0],
+        },
+        monthly: {
+          $arrayElemAt: ['$monthly', 0],
+        },
+        yearly: {
+          $arrayElemAt: ['$yearly', 0],
+        },
+      },
+    },
+    {
+      $addFields: {
+        weekly: '$weekly.result',
+        monthly: '$monthly.result',
+        yearly: '$yearly.result',
+      },
+    },
+  ]);
+  ///today  Total ticket sales
+  let todayTicketSold = await Payments.aggregate([
+    { $match: { date: new Date() } },
+    { $group: { _id: '$quantity', count: { $count: {} } } },
+  ]);
+
+  let bookings = Payments.find({
+    date: {
+      $gte: new Date(new Date().getTime() - 15 * 24 * 60 * 60 * 1000),
+    },
+  }).sort({ date: -1 });
+
+  let events = Events.find({}).sort({ date: -1 });
+
+  res.status(200).json({
+    success: true,
+    data: {
+      sales,
+      todayTicketSold,
+      bookings,
+      events,
+    },
+  });
+});

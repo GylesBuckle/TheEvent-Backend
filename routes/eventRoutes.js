@@ -37,5 +37,7 @@ router.patch(
   eventController.updateEvent
 );
 
+router.post('/getDashboardData', eventController.getDashboardData);
+
 router.delete('/:id', eventController.delete);
 module.exports = router;
