@@ -7,6 +7,25 @@ const deleteFiles = require('../utils/deleteFiles');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { v4: uuidv4 } = require('uuid');
 
+const MONTHS_ARRAY = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+function getDayName(dateStr, locale) {
+  var date = new Date(dateStr);
+  return date.toLocaleDateString(locale, { weekday: 'long' });
+}
+
 exports.searchLocation = catchAsync(async (req, res, next) => {
   const query = req.query.q;
   const lang = req.query.lang;
@@ -466,115 +485,80 @@ exports.userBookings = catchAsync(async (req, res, next) => {
 });
 
 exports.getDashboardData = catchAsync(async (req, res, next) => {
-  //weekly,monthly,yearly sales
-  let sales = await Payments.aggregate([
+  let lastYearSalesGraph = await Payments.aggregate([
     {
-      $facet: {
-        weekly: [
-          {
-            $match: {
-              date: {
-                $gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000),
-              },
-            },
-          },
-          { $group: { _id: '$totalAmount', count: { $count: {} } } },
-          {
-            $group: {
-              _id: null,
-              result: {
-                $push: {
-                  date: '$_id',
-                  count: '$count',
-                },
-              },
-            },
-          },
-        ],
-        monthly: [
-          {
-            $match: {
-              date: {
-                $gte: new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000),
-              },
-            },
-          },
-          { $group: { _id: '$totalAmount', count: { $count: {} } } },
-          {
-            $group: {
-              _id: null,
-              result: {
-                $push: {
-                  date: '$_id',
-                  count: '$count',
-                },
-              },
-            },
-          },
-        ],
-        yearly: [
-          {
-            $match: {
-              date: {
-                $gte: new Date(new Date().getTime() - 360 * 24 * 60 * 60 * 1000),
-              },
-            },
-          },
-          { $group: { _id: '$totalAmount', count: { $count: {} } } },
-          {
-            $group: {
-              _id: null,
-              result: {
-                $push: {
-                  date: '$_id',
-                  count: '$count',
-                },
-              },
-            },
-          },
-        ],
-      },
-    },
-    {
-      $addFields: {
-        weekly: {
-          $arrayElemAt: ['$weekly', 0],
-        },
-        monthly: {
-          $arrayElemAt: ['$monthly', 0],
-        },
-        yearly: {
-          $arrayElemAt: ['$yearly', 0],
+      $match: {
+        date: {
+          $gte: new Date(new Date().getTime() - 360 * 24 * 60 * 60 * 1000),
         },
       },
     },
     {
-      $addFields: {
-        weekly: '$weekly.result',
-        monthly: '$monthly.result',
-        yearly: '$yearly.result',
+      $group: {
+        _id: { $month: '$date' },
+        y: { $sum: '$totalAmount' },
       },
     },
   ]);
+  let lastMonthSalesGraph = await Payments.aggregate([
+    {
+      $match: {
+        date: {
+          $gte: new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000),
+        },
+      },
+    },
+    { $group: { _id: '$date', y: { $sum: '$totalAmount' } } },
+  ]);
+  let lastWeekSalesGraph = await Payments.aggregate([
+    {
+      $match: {
+        date: {
+          $gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000),
+        },
+      },
+    },
+    { $group: { _id: '$date', y: { $sum: '$totalAmount' } } },
+  ]);
+
   ///today  Total ticket sales
   let todayTicketSold = await Payments.aggregate([
     { $match: { date: new Date() } },
-    { $group: { _id: '$quantity', count: { $count: {} } } },
+    { $group: { _id: null, amount: { $sum: '$quantity' } } },
   ]);
 
-  let bookings = Payments.find({
+  let bookings = await Payments.find({
     date: {
       $gte: new Date(new Date().getTime() - 15 * 24 * 60 * 60 * 1000),
     },
-  }).sort({ date: -1 });
+  })
+    .populate('event')
+    .sort({ date: -1 });
 
-  let events = Events.find({}).sort({ date: -1 });
+  let events = await Events.find().sort({ date: -1 });
 
   res.status(200).json({
     success: true,
     data: {
-      sales,
-      todayTicketSold,
+      lastYearSalesGraph: lastYearSalesGraph.map((it) => {
+        return {
+          label: MONTHS_ARRAY[it._id - 1],
+          y: it.y,
+        };
+      }),
+      lastMonthSalesGraph: lastMonthSalesGraph.map((it) => {
+        return {
+          x: it._id,
+          y: it.y,
+        };
+      }),
+      lastWeekSalesGraph: lastWeekSalesGraph.map((item) => {
+        return {
+          y: item.y,
+          label: getDayName(item._id, 'en-US'),
+        };
+      }),
+      todayTicketSold: todayTicketSold[0]?.amount || 0,
       bookings,
       events,
     },
