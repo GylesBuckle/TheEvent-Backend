@@ -9,7 +9,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { v4: uuidv4 } = require('uuid');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
-
+let timezoneTransformer = require('../utils/timeZoneTransformer');
 const MONTHS_ARRAY = [
   'January',
   'February',
@@ -378,7 +378,7 @@ exports.getEvent = catchAsync(async (req, res, next) => {
 
 exports.getEvents = catchAsync(async (req, res, next) => {
   let doc = await Events.find({ startDate: { $gt: new Date() } });
-
+  //let doc = await Events.find();
   res.status(200).json({
     success: true,
     result: doc.length,
@@ -536,9 +536,14 @@ exports.getDashboardData = catchAsync(async (req, res, next) => {
     { $group: { _id: '$date', y: { $sum: '$totalAmount' } } },
   ]);
 
+  var start = new Date();
+  start.setHours(0, 0, 0, 0);
+
+  var end = new Date();
+  end.setHours(23, 59, 59, 999);
   ///today  Total ticket sales
   let todayTicketSold = await Payments.aggregate([
-    { $match: { date: new Date() } },
+    { $match: { date: { $gte: start, $lt: end } } },
     { $group: { _id: null, amount: { $sum: '$quantity' } } },
   ]);
 
