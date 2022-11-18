@@ -9,10 +9,10 @@ const router = express.Router();
 
 router.get('/:id', eventController.getEvent);
 router.get('/', eventController.getEvents);
+router.post('/bookEvent', eventController.bookEvent);
 
 router.use(protect);
 
-router.post('/bookEvent', eventController.bookEvent);
 router.post('/my-bookings', eventController.userBookings);
 
 router.use(restrictTo(['Admin', 'Super Admin']));

@@ -1,11 +1,14 @@
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+let User = require('../models/userModel');
 let Events = require('../models/events');
 let Payments = require('../models/paymentsModal');
 const axios = require('axios');
 const deleteFiles = require('../utils/deleteFiles');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { v4: uuidv4 } = require('uuid');
+const { promisify } = require('util');
+const jwt = require('jsonwebtoken');
 
 const MONTHS_ARRAY = [
   'January',
@@ -402,6 +405,15 @@ exports.bookEvent = catchAsync(async (req, res, next) => {
   if (event.remainingTickets === 0) return next(new AppError('Event out of stock', 404));
   if (quantity > event.remainingTickets) return next(new AppError('Event out of stock', 404));
 
+  let userId;
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    let token = req.headers.authorization.split(' ')[1];
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    if (!user) return next(new AppError('requested User not found', 404));
+    userId = user._id;
+  }
+
   const fakeKey = uuidv4();
   return stripe.customers
     .create({
@@ -425,7 +437,7 @@ exports.bookEvent = catchAsync(async (req, res, next) => {
       const doc = await Payments.create({
         customerData,
         paymentMethod: 'stripe',
-        userId: req.user._id,
+        userId: userId,
         event: event.id,
         totalAmount: event.price * quantity,
         quantity,
@@ -474,7 +486,10 @@ exports.userBookings = catchAsync(async (req, res, next) => {
   const doc = await Payments.find({
     userId: req.user._id,
   })
-    .populate('userId')
+    .populate({
+      path: 'userId',
+      match: { _id: { $exists: true } },
+    })
     .populate('event');
 
   res.status(200).json({

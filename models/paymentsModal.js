@@ -29,7 +29,6 @@ const PaymentSchema = mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
   },
   event: {
     type: mongoose.Schema.Types.ObjectId,
