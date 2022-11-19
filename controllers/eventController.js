@@ -377,8 +377,8 @@ exports.getEvent = catchAsync(async (req, res, next) => {
 });
 
 exports.getEvents = catchAsync(async (req, res, next) => {
-  //let doc = await Events.find({ startDate: { $gt: new Date() } });
-  let doc = await Events.find();
+  let doc = await Events.find({ startDate: { $gt: new Date() } });
+  //let doc = await Events.find();
   res.status(200).json({
     success: true,
     result: doc.length,
