@@ -377,8 +377,8 @@ exports.getEvent = catchAsync(async (req, res, next) => {
 });
 
 exports.getEvents = catchAsync(async (req, res, next) => {
-  let doc = await Events.find({ startDate: { $gt: new Date() } });
-  //let doc = await Events.find();
+  //let doc = await Events.find({ startDate: { $gt: new Date() } });
+  let doc = await Events.find();
   res.status(200).json({
     success: true,
     result: doc.length,
@@ -426,7 +426,7 @@ exports.bookEvent = catchAsync(async (req, res, next) => {
           ///source: stripeToken.card.id,
           customer: customer.id, // set the customer id
           amount: event.price * 100 * quantity, // 25
-          currency: 'usd',
+          currency: 'GBP',
           description: `Product ${event.name} Purchased `,
           receipt_email: customerData.email,
         },
