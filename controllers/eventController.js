@@ -377,7 +377,7 @@ exports.getEvent = catchAsync(async (req, res, next) => {
 });
 
 exports.getEvents = catchAsync(async (req, res, next) => {
-  let doc = await Events.find({ startDate: { $gt: new Date() } });
+  let doc = await Events.find({ startDate: { $gt: new Date() } }).sort({ startDate: 'descending' });
   //let doc = await Events.find();
   res.status(200).json({
     success: true,
@@ -555,7 +555,7 @@ exports.getDashboardData = catchAsync(async (req, res, next) => {
     .populate('event')
     .sort({ date: -1 });
 
-  let events = await Events.find().sort({ date: -1 });
+  let events = await Events.find().sort({ startDate: 'descending' });
 
   res.status(200).json({
     success: true,
